@@ -25,7 +25,7 @@ An Artificial Intelligence (AI)-based system for processing, storing, and search
 
 You can run this application either using **Docker (Recommended)** or by running it manually.
 
-### Option 1: Using Docker (Recommended & Easiest)
+### Option 1: Using Docker (Recommended)
 Using Docker guarantees that all dependencies (including heavy libraries like OpenCV and FAISS) are correctly installed without messing up your local environment.
 
 1. **Clone the repository**
