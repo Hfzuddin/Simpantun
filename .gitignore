@@ -1,0 +1,22 @@
+# Python environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Cache database yang dijana oleh AI
+pantun_faiss.index
+pantun_data.npz
+
+# Dataset sementara yang diproses
+dataset/Dataset.csv
+
+# Imej yang dimuat naik
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE dan Sistem
+.vscode/
+.DS_Store
+*.log

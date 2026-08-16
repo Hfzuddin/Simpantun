@@ -1,0 +1,19 @@
+# Abaikan folder persekitaran maya Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Abaikan fail cache pangkalan data (kerana ia akan dijana semula di dalam Docker)
+pantun_faiss.index
+pantun_data.npz
+dataset/Dataset.csv
+
+# Abaikan imej yang dimuat naik pengguna
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Lain-lain fail sistem yang tidak diperlukan dalam kontena
+.git/
+.vscode/
+.DS_Store
