@@ -1,90 +1,79 @@
-# 📝 Simpantun
+# Simpantun
 
 An Artificial Intelligence (AI)-based system for processing, storing, and searching Malay Pantuns. This system integrates Optical Character Recognition (OCR) technology to extract pantuns from images, along with a smart search engine using FAISS.
 
-## 🚀 Key Features
+## 🌟 Features
 - **Smart Search:** Similarity-based pantun search using vector models and the FAISS algorithm.
 - **Image Text Recognition (OCR):** Upload images (JPG, PNG, WEBP) to extract pantun text using EasyOCR.
+- **Visual Image Search:** Upload an image without text, and the AI will analyze its contents (e.g., nature, animals) to recommend related pantuns.
 - **Modern & Responsive Interface:** Built with modern frontend technologies (Vite + React) for fast performance.
-- **High-Performance API:** Backend powered by Flask with automated caching and data processing.
-- **Docker Support:** The codebase is ready for deployment using Docker containers.
 
-## 🛠️ Tech Stack
-**Backend (Python/Flask)**
-- Flask
-- EasyOCR & OpenCV (Image Processing and Computer Vision)
-- FAISS (Vector Search/Similarity Search)
-- NumPy & Pandas (Dataset Management)
+## 🛠️ Technology Stack
+- **Backend:** Python, Flask
+- **AI Model:** SentenceTransformers (CLIP), FAISS (Vector Search)
+- **Computer Vision:** OpenCV, EasyOCR
+- **Frontend:** React, Vite
 
-**Frontend (React/Vite)**
-- Vite (Build Tool)
-- React.js / JavaScript
-
-## 📁 Project Structure
-
-```text
-Simpantun/
-├── app/                  # Backend API Routes and Modules (Flask)
-├── dataset/              # Raw dataset directory (Excel/CSV)
-├── frontend/             # Frontend user interface source code (React + Vite)
-├── requirements.txt      # Python package dependencies
-├── config.py             # System configuration and global parameters
-├── run.py                # Backend server launch script
-├── Dockerfile            # Docker container specifications
-└── .gitignore            # GitHub file exclusion rules
-```
-
-## ⚙️ Prerequisites
-Ensure the following software is installed on your computer:
-- [Python 3.10+](https://www.python.org/)
-- [Node.js](https://nodejs.org/) (Version 16 or latest)
-- [Git](https://git-scm.com/)
+## 📋 Prerequisites
+- **Git** (for cloning)
+- **Python 3.10+**
+- **Node.js 16+**
 
 ---
 
-## 💻 Local Setup Guide
+## 🚀 Getting Started
 
-### 1. Backend Configuration (Server)
-Open a new terminal in the main project folder (`Simpantun`):
+Follow these steps to run the application locally on your machine.
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Hfzuddin/Simpantun.git
+cd Simpantun
+```
+
+### 2. Backend Setup
+Open a terminal in the main folder and install the Python dependencies:
 
 ```bash
-# (Optional) Create and activate a Python Virtual Environment
+# (Optional but recommended) Create a virtual environment
 python -m venv venv
-# For Windows:
-venv\Scripts\activate
-# For Mac/Linux:
-source venv/bin/activate
+venv\Scripts\activate  # Windows
+# source venv/bin/activate # Mac/Linux
 
-# Install all requirements
+# Install requirements
 pip install -r requirements.txt
 
-# Run the system
+# Run the Flask backend
 python run.py
 ```
-*The backend will run by default at `http://127.0.0.1:5500`.*
+*The backend server and AI models will start loading. Once ready, it will run at `http://127.0.0.1:5500`.*
 
-### 2. Frontend Configuration (Interface)
-Open a separate terminal, and navigate to the `frontend` directory:
+### 3. Frontend Setup
+Open a separate, new terminal, and navigate to the frontend folder:
 
 ```bash
 cd frontend
 
-# Install Node Modules packages
+# Install Node Modules
 npm install
 
 # Launch Web Application
 npm run dev
 ```
+*Vite will provide a local URL (typically `http://localhost:5173`). Open this URL in your browser to view the application.*
 
 ---
 
-## 🐳 Docker Guide (Deployment)
-You can also launch the backend system using Docker to streamline the production deployment process:
+## 📖 How to Use
 
-```bash
-# Build the Docker image
-docker build -t simpantun-app .
+Once both servers are running and you have the application open in your browser, you can search for pantuns in two ways:
 
-# Run the container
-docker run -p 5500:5500 simpantun-app
-```
+### Text Search
+1. Locate the search bar on the dashboard.
+2. Type any keyword, phrase, or topic (e.g., "kasih sayang", "nasihat budi", or "alam sekitar").
+3. The system's AI will understand the context of your search and instantly retrieve the most relevant pantuns from the database based on a similarity score.
+
+### Image / OCR Search
+1. Click the upload button to provide an image (JPG, PNG, or WEBP).
+2. **If the image contains text:** The system uses OCR to read the words in the picture and instantly finds pantuns that match the extracted text.
+3. **If the image has no text:** The system analyzes the picture using Computer Vision to detect objects or scenes (e.g., detecting a "cat" or "beach"), and automatically recommends pantuns related to that visual theme.
