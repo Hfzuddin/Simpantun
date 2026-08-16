@@ -10,7 +10,7 @@ import faiss
 from sentence_transformers import SentenceTransformer, util
 from flask import current_app
 from collections import Counter
-from app.utils import extract_keywords, clean_ocr_text, format_pantun_visual
+from app.utils import extract_keywords, clean_ocr_text, format_pantun_visual, determine_theme
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +41,14 @@ CANDIDATE_WORDS = [
 def load_models():
     global TAGS_EMBEDDINGS
     if models["text_embedder"] is None:
-        logger.info("🔄 Memuatkan Model AI (dan CLIP)...")
+        logger.info("Loading AI Models (and CLIP)...")
         models["reader"] = easyocr.Reader(['ms', 'en'], gpu=False)
         models["text_embedder"] = SentenceTransformer('sentence-transformers/clip-ViT-B-32-multilingual-v1')
         models["visual_embedder"] = SentenceTransformer('clip-ViT-B-32')
         
-        logger.info("⚡ Pre-computing Visual Tags...")
+        logger.info("Pre-computing Visual Tags...")
         TAGS_EMBEDDINGS = models["text_embedder"].encode(CANDIDATE_WORDS, convert_to_tensor=True)
-        logger.info("✅ Model Siap!")
+        logger.info("Model Ready!")
 
 def extract_text(image_np):
     try:
@@ -66,7 +66,7 @@ def load_dataset_fast():
 
     if os.path.exists(index_file) and os.path.exists(data_file):
         try:
-            logger.info("🚀 Loading Database Cache...")
+            logger.info("Loading Database Cache...")
             db_data["index"] = faiss.read_index(index_file)
             cached = np.load(data_file, allow_pickle=True)
             db_data["texts"] = cached['texts'].tolist()
@@ -74,9 +74,9 @@ def load_dataset_fast():
             db_data["authors"] = cached['authors'].tolist()
             return
         except Exception as e: 
-            logger.warning(f"Gagal memuat cache: {e}")
+            logger.warning(f"Failed to load cache: {e}")
 
-    logger.info("⚙️ Memproses Excel...")
+    logger.info("Processing Excel...")
     load_models()
     
     if not os.path.exists(processed_csv):
@@ -87,7 +87,7 @@ def load_dataset_fast():
     if os.path.exists(processed_csv):
         df = pd.read_csv(processed_csv).fillna("")
         texts = df['text'].astype(str).tolist()
-        titles = df['tema'].tolist() if 'tema' in df.columns else ["Umum"] * len(texts)
+        titles = df['tema'].tolist() if 'tema' in df.columns else ["General"] * len(texts)
         authors = df['asal'].tolist() if 'asal' in df.columns else ["Dataset"] * len(texts)
 
         embeddings = models["text_embedder"].encode(texts, convert_to_tensor=False, show_progress_bar=True)
@@ -101,7 +101,7 @@ def load_dataset_fast():
         np.savez(data_file, texts=texts, titles=titles, authors=authors)
         
         db_data["texts"], db_data["titles"], db_data["authors"], db_data["index"] = texts, titles, authors, index
-        logger.info("✅ Database Siap!")
+        logger.info("Database Ready!")
 
 def detect_visual_tags(image, model):
     try:
@@ -136,7 +136,7 @@ def process_pipeline(input_data, mode='image'):
     try:
         if mode == 'text':
             extracted_text = input_data
-            search_mode = "⌨️ Carian Teks"
+            search_mode = "Text Search"
             detected_keywords = extract_keywords(extracted_text)
             query_vec = models["text_embedder"].encode([extracted_text], convert_to_tensor=False)
         else:
@@ -147,15 +147,15 @@ def process_pipeline(input_data, mode='image'):
                     image = image.convert('RGB')
                 if image.width > 800: image.thumbnail((800, 800))
                 image_np = np.array(image)
-            except: return {"error": "Imej rosak."}
+            except: return {"error": "Corrupted image."}
 
             extracted_text = extract_text(image_np)
             if extracted_text:
-                search_mode = "📄 Carian Teks OCR"
+                search_mode = "OCR Text Search"
                 detected_keywords = extract_keywords(extracted_text)
                 query_vec = models["text_embedder"].encode([extracted_text], convert_to_tensor=False)
             else:
-                search_mode = "🖼️ Carian Imej (Visual)"
+                search_mode = "Image Search (Visual)"
                 detected_keywords = detect_visual_tags(image, models["visual_embedder"])
                 query_vec = models["visual_embedder"].encode([image_np], convert_to_tensor=False)
                     
@@ -173,7 +173,7 @@ def process_pipeline(input_data, mode='image'):
                     fmt_text = format_pantun_visual(db_data["texts"][idx])
                     
                     results.append({
-                        'title': db_data["titles"][idx],
+                        'title': determine_theme(db_data["texts"][idx]),
                         'content': db_data["texts"][idx],
                         'highlighted_content': fmt_text,
                         'author': db_data["authors"][idx],
@@ -183,7 +183,7 @@ def process_pipeline(input_data, mode='image'):
             return {
                 'search_mode': search_mode,
                 'extracted_text': extracted_text,
-                'pantun_input': extracted_text if mode == 'text' or len(extracted_text) > 4 else "Analisis Imej Visual",
+                'pantun_input': extracted_text if mode == 'text' or len(extracted_text) > 4 else "Visual Image Analysis",
                 'input_keywords': detected_keywords,
                 'results': results
             }
@@ -191,4 +191,4 @@ def process_pipeline(input_data, mode='image'):
     except Exception as e:
         logger.error(f"Pipeline: {e}")
         return {"error": str(e)}
-    return {"error": "Ralat."}
+    return {"error": "Error."}

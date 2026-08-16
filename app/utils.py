@@ -23,3 +23,23 @@ def extract_keywords(text):
     stopwords = {'dan', 'yang', 'di', 'ke', 'itu', 'ini', 'adalah', 'saya', 'nak', 'untuk'}
     keywords = [w for w in words if w not in stopwords and len(w) > 2]
     return list(set(keywords))
+
+def determine_theme(text):
+    if not text: return "Umum"
+    text = text.lower()
+    
+    themes = {
+        "Nasihat": ["nasihat", "pesan", "ingat", "jangan", "ilmu", "belajar", "guru", "buku", "tuntut", "pedoman"],
+        "Budi": ["budi", "baik", "jasa", "hutang", "emas", "sopan", "bahasa", "adab"],
+        "Kasih Sayang": ["kasih", "sayang", "cinta", "rindu", "hati", "jiwa", "kekasih", "merindu", "asmara"],
+        "Agama": ["tuhan", "allah", "doa", "syurga", "neraka", "sembahyang", "solat", "iman", "dosa", "pahala", "agama"],
+        "Jenaka": ["ketawa", "lucu", "geli", "senyum", "kera", "beruk", "katak", "kucing", "anjing", "tikus"],
+        "Nasib & Perantau": ["rantau", "nasib", "dagang", "merantau", "kampung", "sedih", "menangis", "jauh", "miskin", "susah"]
+    }
+    
+    for theme, keywords in themes.items():
+        if any(kw in text for kw in keywords):
+            return theme
+            
+    return "Umum"
+
