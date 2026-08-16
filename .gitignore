@@ -5,18 +5,18 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Cache database yang dijana oleh AI
+# AI generated database cache
 pantun_faiss.index
 pantun_data.npz
 
-# Dataset sementara yang diproses
+# Temporary processed dataset
 dataset/Dataset.csv
 
-# Imej yang dimuat naik
+# Uploaded images
 app/static/uploads/*
 !app/static/uploads/.gitkeep
 
-# IDE dan Sistem
+# IDE and System files
 .vscode/
 .DS_Store
 *.log

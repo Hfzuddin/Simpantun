@@ -1,9 +1,9 @@
 FROM python:3.10-slim
 
-# Tetapkan direktori kerja
+# Set working directory
 WORKDIR /app
 
-# Install sistem dependencies (penting untuk OpenCV, EasyOCR, dll)
+# Install system dependencies (important for OpenCV, EasyOCR, etc)
 RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     libsm6 \
@@ -12,18 +12,18 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
-# Salin fail keperluan Python
+# Copy Python requirements file
 COPY requirements.txt .
 
-# Install dependencies Python
-# Nota: Menggunakan --no-cache-dir untuk saiz imej Docker yang lebih kecil
+# Install Python dependencies
+# Note: Using --no-cache-dir for a smaller Docker image size
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Salin keseluruhan kod sumber ke dalam kontena
+# Copy entire source code into container
 COPY . .
 
-# Dedahkan port 5500 yang digunakan oleh Flask
+# Expose port 5500 used by Flask
 EXPOSE 5500
 
-# Jalankan aplikasi (run.py sudah ditetapkan host='0.0.0.0')
+# Run application (run.py is already set to host='0.0.0.0')
 CMD ["python", "run.py"]

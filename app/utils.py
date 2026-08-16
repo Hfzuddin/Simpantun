@@ -10,7 +10,7 @@ def clean_ocr_text(text):
     return " ".join(cleaned.split())
 
 def format_pantun_visual(text):
-    """Format teks pantun (tambah newline jika perlu)."""
+    """Format pantun text (add newline if necessary)."""
     if '\n' in text: return text
     parts = text.split(',')
     if len(parts) >= 2: return ",\n".join(parts)
