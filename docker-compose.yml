@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  simpantun:
+    build: .
+    container_name: simpantun-app
+    ports:
+      - "5500:5500"
+    restart: unless-stopped

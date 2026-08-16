@@ -1,3 +1,24 @@
+# ==========================================
+# STAGE 1: Build the React Frontend
+# ==========================================
+FROM node:18 AS frontend-builder
+
+WORKDIR /app/frontend
+
+# Copy package files and install dependencies
+COPY frontend/package*.json ./
+RUN npm install
+
+# Copy the rest of the frontend source code
+COPY frontend/ ./
+
+# Build the Vite React app for production
+RUN npm run build
+
+
+# ==========================================
+# STAGE 2: Build the Python Backend
+# ==========================================
 FROM python:3.10-slim
 
 # Set working directory
@@ -19,8 +40,11 @@ COPY requirements.txt .
 # Note: Using --no-cache-dir for a smaller Docker image size
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy entire source code into container
+# Copy entire backend source code into container
 COPY . .
+
+# Copy the compiled frontend (dist) from Stage 1
+COPY --from=frontend-builder /app/dist /app/dist
 
 # Expose port 5500 used by Flask
 EXPOSE 5500

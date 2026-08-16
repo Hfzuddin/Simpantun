@@ -16,57 +16,83 @@ An Artificial Intelligence (AI)-based system for processing, storing, and search
 
 ## 📋 Prerequisites
 - **Git** (for cloning)
-- **Python 3.10+**
-- **Node.js 16+**
+- **Docker Desktop** (Recommended)
+- *OR* **Python 3.10+ and Node.js 16+** (if running manually)
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to run the application locally on your machine.
+You can run this application either using **Docker (Recommended)** or by running it manually.
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/Hfzuddin/Simpantun.git
-cd Simpantun
-```
+### Option 1: Using Docker (Recommended & Easiest)
+Using Docker guarantees that all dependencies (including heavy libraries like OpenCV and FAISS) are correctly installed without messing up your local environment.
 
-### 2. Backend Setup
-Open a terminal in the main folder and install the Python dependencies:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Hfzuddin/Simpantun.git
+   cd Simpantun
+   ```
 
-```bash
-# (Optional but recommended) Create a virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate # Mac/Linux
+2. **Start Docker Desktop** on your computer.
 
-# Install requirements
-pip install -r requirements.txt
+3. **Run the Application**
+   Open your terminal in the project directory and run:
+   ```bash
+   docker-compose up -d --build
+   ```
+   *Note: The first time you run this, it may take several minutes to download the Python image, compile the frontend, and install the AI libraries.*
 
-# Run the Flask backend
-python run.py
-```
-*The backend server and AI models will start loading. Once ready, it will run at `http://127.0.0.1:5500`.*
+4. **Access the Web App**
+   Open your browser and navigate to: [http://localhost:5500](http://localhost:5500)
 
-### 3. Frontend Setup
-Open a separate, new terminal, and navigate to the frontend folder:
+5. **Stop the Application**
+   ```bash
+   docker-compose down
+   ```
 
-```bash
-cd frontend
+### Option 2: Traditional Manual Installation (Without Docker)
 
-# Install Node Modules
-npm install
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Hfzuddin/Simpantun.git
+   cd Simpantun
+   ```
 
-# Launch Web Application
-npm run dev
-```
-*Vite will provide a local URL (typically `http://localhost:5173`). Open this URL in your browser to view the application.*
+2. **Backend Setup**
+   Open a terminal in the main folder and install the Python dependencies:
+   ```bash
+   # (Optional but recommended) Create a virtual environment
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   # source venv/bin/activate # Mac/Linux
+
+   # Install requirements
+   pip install -r requirements.txt
+
+   # Run the Flask backend
+   python run.py
+   ```
+   *The backend server will start loading. Once ready, it runs at `http://127.0.0.1:5500`.*
+
+3. **Frontend Setup**
+   Open a separate, new terminal, and navigate to the frontend folder:
+   ```bash
+   cd frontend
+
+   # Install Node Modules
+   npm install
+
+   # Launch Web Application
+   npm run dev
+   ```
+   *Vite will provide a local URL (typically `http://localhost:5173`). Open this URL in your browser to view the application.*
 
 ---
 
 ## 📖 How to Use
 
-Once both servers are running and you have the application open in your browser, you can search for pantuns in two ways:
+Once the server is running and you have the application open in your browser, you can search for pantuns in two ways:
 
 ### Text Search
 1. Locate the search bar on the dashboard.
