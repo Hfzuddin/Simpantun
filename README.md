@@ -88,10 +88,3 @@ docker build -t simpantun-app .
 # Run the container
 docker run -p 5500:5500 simpantun-app
 ```
-
-## 🔒 GitHub Configuration
-This repository's rules have been aligned for safe pushes to GitHub.
-The `.gitignore` feature ensures that:
-- Virtual directories (`venv`, `__pycache__`) and `node_modules` will not be pushed.
-- Large AI files like the `pantun_faiss.index` and `pantun_data.npz` models are automatically ignored.
-- The image upload directory (`app/static/uploads`) only tracks the basic `.gitkeep` file to maintain user privacy security.
