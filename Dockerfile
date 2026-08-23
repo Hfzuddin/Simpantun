@@ -51,4 +51,6 @@ EXPOSE 5500
 
 # Run via gunicorn. 1 worker on purpose: each worker would load its own
 # ~2GB copy of the CLIP/EasyOCR models, so more workers risks OOM.
-CMD exec gunicorn --bind :${PORT:-5500} --workers 1 --threads 8 --timeout 120 run:app
+# timeout=300 matches Cloud Run's own request timeout: cold-start model
+# loading measured at ~82s locally, so this leaves headroom on slower runs.
+CMD exec gunicorn --bind :${PORT:-5500} --workers 1 --threads 8 --timeout 300 run:app
