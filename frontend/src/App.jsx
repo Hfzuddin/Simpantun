@@ -4,8 +4,10 @@ import Sidebar from "./components/Sidebar";
 import ScanPage from "./pages/ScanPage";
 import ResultPage from "./pages/ResultPage";
 import HistoryPage from "./pages/HistoryPage";
+import { useLanguage } from "./context/LanguageContext";
 
 function App() {
+  const { lang, toggleLanguage } = useLanguage();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -37,7 +39,16 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-layout">
-        <Sidebar 
+        <button
+          className="lang-corner-btn"
+          onClick={toggleLanguage}
+          title={lang === "en" ? "Bahasa Melayu" : "English"}
+          aria-label="Toggle language"
+        >
+          <i className="fas fa-language fa-xl"></i>
+        </button>
+
+        <Sidebar
           collapsed={sidebarCollapsed} 
           open={sidebarOpen}
           isDark={isDark}

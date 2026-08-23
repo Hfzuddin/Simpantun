@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Sidebar({ collapsed, open, isDark, toggleSidebar, toggleTheme }) {
+  const { t } = useLanguage();
   let className = "sidebar";
   if (collapsed) className += " collapsed";
   if (open) className += " open"; // mobile menu
@@ -20,14 +22,14 @@ export default function Sidebar({ collapsed, open, isDark, toggleSidebar, toggle
           end
         >
           <i className="fas fa-camera"></i>
-          <span className="nav-label">Scan</span>
+          <span className="nav-label">{t("nav_scan")}</span>
         </NavLink>
         <NavLink
           to="/result"
           className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
         >
           <i className="fas fa-clipboard-list"></i>
-          <span className="nav-label">Results</span>
+          <span className="nav-label">{t("nav_results")}</span>
         </NavLink>
 
         <NavLink
@@ -35,13 +37,13 @@ export default function Sidebar({ collapsed, open, isDark, toggleSidebar, toggle
           className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
         >
           <i className="fa-solid fa-clock-rotate-left"></i>
-          <span className="nav-label">History</span>
+          <span className="nav-label">{t("nav_history")}</span>
         </NavLink>
       </nav>
       <div className="sidebar-footer">
         <button className="theme-btn" onClick={toggleTheme}>
           <i id="theme-icon" className={isDark ? "fas fa-sun text-yellow-400" : "fas fa-moon"} style={{ color: isDark ? "#facc15" : "" }}></i>
-          <span className="nav-label" id="theme-text">{isDark ? "Light Mode" : "Dark Mode"}</span>
+          <span className="nav-label" id="theme-text">{isDark ? t("theme_light") : t("theme_dark")}</span>
         </button>
       </div>
     </aside>

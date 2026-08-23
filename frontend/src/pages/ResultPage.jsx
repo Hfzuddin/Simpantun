@@ -1,10 +1,14 @@
 import { useLocation, Link } from "react-router-dom";
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import { SEARCH_MODE_KEYS } from "../i18n/translations";
 
 export default function ResultPage() {
+  const { t } = useLanguage();
   const location = useLocation();
   const state = location.state || {};
   const { results = [], search_mode = "", input_keywords = [], image_url, extracted_text } = state;
+  const displayMode = t(SEARCH_MODE_KEYS[search_mode]) || search_mode;
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -35,8 +39,8 @@ export default function ResultPage() {
     return (
       <div className="content-area result-content-area" style={{ justifyContent: "center", alignItems: "center" }}>
         <div style={{ textAlign: "center" }}>
-          <h2 style={{ marginBottom: "15px" }}>No Analysis Data Found</h2>
-          <Link to="/" className="btn-back">Go to Upload Scan</Link>
+          <h2 style={{ marginBottom: "15px" }}>{t("no_data_title")}</h2>
+          <Link to="/" className="btn-back">{t("go_to_scan")}</Link>
         </div>
       </div>
     );
@@ -45,23 +49,23 @@ export default function ResultPage() {
   return (
     <div className="content-area result-content-area">
       <div className="result-panel">
-        <Link to="/" className="btn-back"><i className="fas fa-arrow-left"></i> New Search</Link>
+        <Link to="/" className="btn-back"><i className="fas fa-arrow-left"></i> {t("new_search")}</Link>
 
         {image_url && <img src={image_url} className="img-preview" alt="Uploaded Preview" />}
 
         <div className="box">
-          <h3><i className="fa-solid fa-code"></i> Analysis Findings</h3>
+          <h3><i className="fa-solid fa-code"></i> {t("analysis_findings")}</h3>
           <div style={{ marginBottom: "10px", fontSize: "0.9em", color: "var(--text-muted)" }}>
-            <strong>Mode:</strong>
+            <strong>{t("mode_label")}</strong>
             <span style={isVisualMode ? { color: "#22c55e", fontWeight: "bold", marginLeft: "5px" } : { marginLeft: "5px" }}>
-              {search_mode}
+              {displayMode}
             </span>
           </div>
 
           <div style={{ marginTop: "30  px" }}>
             <strong>
               {isVisualMode ? <i className="fas fa-camera"></i> : <i className="fas fa-tags"></i>}
-              {isVisualMode ? " Detected Visual Objects:" : " Text Keywords:"}
+              {isVisualMode ? ` ${t("detected_visual")}` : ` ${t("text_keywords")}`}
             </strong><br />
             <div style={{ marginTop: "5px" }}>
               {input_keywords.length > 0 ? (
@@ -70,7 +74,7 @@ export default function ResultPage() {
                 ))
               ) : (
                 <span style={{ color: "var(--text-muted)", fontStyle: "italic", fontSize: "0.85em" }}>
-                  No objects or keywords detected.
+                  {t("no_keywords")}
                 </span>
               )}
             </div>
@@ -80,7 +84,7 @@ export default function ResultPage() {
             <>
               <hr style={{ margin: "15px 0", borderTop: "1px dashed var(--border-color)" }} />
               <p>
-                <strong><i className="fas fa-file-alt"></i> OCR Text:</strong><br />
+                <strong><i className="fas fa-file-alt"></i> {t("ocr_text_label")}</strong><br />
                 <em style={{ color: "var(--text-muted)", fontSize: "0.9em" }}>"{extracted_text}"</em>
               </p>
             </>
@@ -90,14 +94,14 @@ export default function ResultPage() {
 
       <div className="results-main">
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", borderBottom: "2px solid var(--border-color)", paddingBottom: "10px" }}>
-          <h2>Pantun Search Results</h2>
-          <small style={{ alignSelf: "flex-end", color: "var(--text-muted)" }}>Sorted by similarity level</small>
+          <h2>{t("search_results_title")}</h2>
+          <small style={{ alignSelf: "flex-end", color: "var(--text-muted)" }}>{t("sorted_by")}</small>
         </div>
 
         <div className="results-grid">
           {results.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px", gridColumn: "1 / -1", color: "var(--text-muted)" }}>
-              No matching pantun found.
+              {t("no_matches")}
             </div>
           ) : (
             currentItems.map((item, i) => {
@@ -125,15 +129,15 @@ export default function ResultPage() {
 
                   <div className="card-footer">
                     <div style={{ fontSize: "0.8em", color: "var(--text-muted)", marginBottom: "5px" }}>
-                      <strong>#{globalIdx}</strong> &bull; Source: {item.author}
+                      <strong>#{globalIdx}</strong> &bull; {t("source")}: {item.author}
                     </div>
                     {matched.length > 0 ? (
                       <div className="match-reason">
-                        <strong><i className={isVisualMode ? "fas fa-camera" : "fas fa-tag"}></i> Match:</strong> {matched.join(', ')}
+                        <strong><i className={isVisualMode ? "fas fa-camera" : "fas fa-tag"}></i> {t("match")}</strong> {matched.join(', ')}
                       </div>
                     ) : (
                       <div className="match-reason semantic">
-                        <strong><i className="fas fa-brain"></i> Semantic:</strong> {item.score > 85 ? "Highly relevant theme." : "Visual concept/meaning match."}
+                        <strong><i className="fas fa-brain"></i> {t("semantic")}</strong> {item.score > 85 ? t("highly_relevant") : t("visual_match")}
                       </div>
                     )}
                   </div>

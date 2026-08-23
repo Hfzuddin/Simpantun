@@ -30,6 +30,24 @@ body { background: var(--bg-color); color: var(--text-main); overflow: hidden; t
 /* --- APP LAYOUT --- */
 .app-layout { display: flex; height: 100vh; }
 
+/* --- LANGUAGE TOGGLE (fixed corner) --- */
+.lang-corner-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+.lang-corner-btn:hover { opacity: 0.7; }
+
 /* --- SIDEBAR --- */
 .sidebar, .sidebar-nav-container {
   width: 256px;
