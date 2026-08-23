@@ -46,8 +46,9 @@ COPY . .
 # Copy the compiled frontend (dist) from Stage 1
 COPY --from=frontend-builder /app/dist /app/dist
 
-# Expose port 5500 used by Flask
+# Expose port 5500 used by Flask (Cloud Run overrides this via $PORT at runtime)
 EXPOSE 5500
 
-# Run application (run.py is already set to host='0.0.0.0')
-CMD ["python", "run.py"]
+# Run via gunicorn. 1 worker on purpose: each worker would load its own
+# ~2GB copy of the CLIP/EasyOCR models, so more workers risks OOM.
+CMD exec gunicorn --bind :${PORT:-5500} --workers 1 --threads 8 --timeout 120 run:app

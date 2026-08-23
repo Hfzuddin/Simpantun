@@ -90,6 +90,39 @@ Using Docker guarantees that all dependencies (including heavy libraries like Op
 
 ---
 
+## ☁️ Deployment (Google Cloud Run)
+
+The backend serves the built frontend directly (see `app/__init__.py`), so the whole app deploys as a single container. Cloud Run's free tier is used here because the AI stack (PyTorch, CLIP, EasyOCR) needs more RAM than most free hosts (Render, Fly.io, Railway) offer on their no-cost plans.
+
+**One-time setup** (in [Google Cloud Console](https://console.cloud.google.com) or [Cloud Shell](https://console.cloud.google.com/?cloudshell=true)):
+1. Create/select a GCP project and [enable billing](https://console.cloud.google.com/billing) (a card is required to activate Cloud Run, even for free-tier usage).
+2. Enable the required APIs:
+   ```bash
+   gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com
+   ```
+
+**Deploy:**
+```bash
+gcloud run deploy simpantun \
+  --source . \
+  --region us-central1 \
+  --memory 4Gi \
+  --cpu 2 \
+  --min-instances 0 \
+  --max-instances 3 \
+  --timeout 300 \
+  --allow-unauthenticated
+```
+Cloud Build reads the `Dockerfile` automatically — no image push needed. On success it prints a public `*.run.app` URL.
+
+**Free tier notes:**
+- The Always Free quota (2M requests, 180,000 vCPU-sec, 360,000 GiB-sec per month) only applies in `us-central1`, `us-east1`, or `us-west1`. Deploying elsewhere bills from the first request.
+- Keep `--min-instances 0` — the service scales to zero and costs nothing while idle. Setting a minimum instance count keeps a container warm 24/7 and will incur real charges.
+- `requirements.txt` pins the CPU-only PyTorch build (`+cpu` wheels via the PyTorch CPU index) — the default PyPI `torch` wheel drags in ~2GB of unused CUDA/NVIDIA packages since this app never sets `gpu=True`. The resulting image is ~1.1GB, just over Artifact Registry's 0.5GB free storage, so expect a negligible storage charge (well under $0.10/month).
+- Every cold start reloads the CLIP/EasyOCR models from scratch (Cloud Run's filesystem isn't persisted between instances), so the first request after idle time can take 30-90s; subsequent requests are fast until it scales back down.
+
+---
+
 ## 📖 How to Use
 
 Once the server is running and you have the application open in your browser, you can search for pantuns in two ways:
