@@ -1,6 +1,7 @@
 import os
 import logging
 import base64
+import threading
 import numpy as np
 import pandas as pd
 from io import BytesIO
@@ -27,6 +28,8 @@ db_data = {
     "index": None
 }
 
+_visual_model_lock = threading.Lock()
+
 TAGS_EMBEDDINGS = None
 CANDIDATE_WORDS = [
     "alam", "bunga", "laut", "gunung", "hutan", "awan", "matahari", "bulan",
@@ -41,14 +44,23 @@ CANDIDATE_WORDS = [
 def load_models():
     global TAGS_EMBEDDINGS
     if models["text_embedder"] is None:
-        logger.info("Loading AI Models (and CLIP)...")
+        logger.info("Loading AI Models...")
         models["reader"] = easyocr.Reader(['ms', 'en'], gpu=False)
         models["text_embedder"] = SentenceTransformer('sentence-transformers/clip-ViT-B-32-multilingual-v1')
-        models["visual_embedder"] = SentenceTransformer('clip-ViT-B-32')
-        
+        # visual_embedder is loaded lazily (see load_visual_model) since it's only
+        # needed for image searches with no OCR text, saving ~600MB on every other request.
+
         logger.info("Pre-computing Visual Tags...")
         TAGS_EMBEDDINGS = models["text_embedder"].encode(CANDIDATE_WORDS, convert_to_tensor=True)
         logger.info("Model Ready!")
+
+def load_visual_model():
+    if models["visual_embedder"] is None:
+        with _visual_model_lock:
+            if models["visual_embedder"] is None:
+                logger.info("Loading Visual Model (CLIP)...")
+                models["visual_embedder"] = SentenceTransformer('clip-ViT-B-32')
+                logger.info("Visual Model Ready!")
 
 def extract_text(image_np):
     try:
@@ -107,18 +119,26 @@ def detect_visual_tags(image, model):
     try:
         if image.mode != 'RGB':
             image = image.convert('RGB')
-        
+
         img_vec = model.encode([image], convert_to_tensor=True)
         scores = util.cos_sim(img_vec, TAGS_EMBEDDINGS)[0]
+        mean_score = float(scores.mean())
+        std_score = float(scores.std())
         top_results = scores.topk(5)
-        
+
         detected_tags = []
         for score, idx in zip(top_results[0], top_results[1]):
-            if score > 0.10: 
+            score = float(score)
+            # CLIP's raw similarity has a per-image baseline offset (even a
+            # blank image scores ~0.25 against everything), so a fixed
+            # threshold can't tell "confident match" from "no match". Instead,
+            # a tag only counts if it stands out from this image's own score
+            # distribution across all candidate words.
+            if score > mean_score + 1.5 * std_score:
                 detected_tags.append(CANDIDATE_WORDS[idx])
-        
-        if not detected_tags and len(top_results[0]) > 0:
-             detected_tags.append(CANDIDATE_WORDS[top_results[1][0]])
+
+        if not detected_tags:
+            detected_tags.append(CANDIDATE_WORDS[top_results[1][0]])
 
         return detected_tags
     except Exception as e:
@@ -156,29 +176,52 @@ def process_pipeline(input_data, mode='image'):
                 query_vec = models["text_embedder"].encode([extracted_text], convert_to_tensor=False)
             else:
                 search_mode = "Image Search (Visual)"
+                load_visual_model()
                 detected_keywords = detect_visual_tags(image, models["visual_embedder"])
-                query_vec = models["visual_embedder"].encode([image_np], convert_to_tensor=False)
+                # Search using the detected concepts as text, in the same embedding
+                # space as the indexed pantun texts, rather than the raw image
+                # embedding. CLIP aligns images well with short captions, but pantuns
+                # are stylised rhyming verse, not literal descriptions, so matching
+                # the image straight against pantun text is much noisier.
+                query_vec = models["text_embedder"].encode([" ".join(detected_keywords)], convert_to_tensor=False)
                     
         if query_vec is not None:
             query_vec = np.array(query_vec).astype('float32')
             faiss.normalize_L2(query_vec)
             
-            k = 50 
+            k = 50
             scores, indices = db_data["index"].search(query_vec.reshape(1, -1), k)
-            
+
             results = []
             for i in range(k):
                 idx = indices[0][i]
                 if idx != -1 and idx < len(db_data["texts"]):
                     fmt_text = format_pantun_visual(db_data["texts"][idx])
-                    
+                    semantic_score = float(scores[0][i] * 100)
+
+                    # Short/abstract queries can embed close to a handful of
+                    # generic-sounding pantuns that share no actual vocabulary
+                    # with the query, letting them outrank genuinely on-topic
+                    # results. Blend in literal keyword overlap so a pantun
+                    # that doesn't mention any detected keyword can't win
+                    # purely on a coincidentally high embedding similarity.
+                    if detected_keywords:
+                        pantun_lower = db_data["texts"][idx].lower()
+                        matched = sum(1 for kw in detected_keywords if kw.lower() in pantun_lower)
+                        overlap_ratio = matched / len(detected_keywords)
+                        final_score = semantic_score * 0.75 + overlap_ratio * 100 * 0.25
+                    else:
+                        final_score = semantic_score
+
                     results.append({
                         'title': determine_theme(db_data["texts"][idx]),
                         'content': db_data["texts"][idx],
                         'highlighted_content': fmt_text,
                         'author': db_data["authors"][idx],
-                        'score': float(scores[0][i] * 100)
+                        'score': final_score
                     })
+
+            results.sort(key=lambda r: r['score'], reverse=True)
             
             return {
                 'search_mode': search_mode,

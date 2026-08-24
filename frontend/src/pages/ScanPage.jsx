@@ -4,6 +4,9 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import { useLanguage } from "../context/LanguageContext";
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB, matches the limit shown in the UI
+
 export default function ScanPage({ totalPantun, dbStatus }) {
   const { t } = useLanguage();
   const [tab, setTab] = useState("image");
@@ -28,14 +31,21 @@ export default function ScanPage({ totalPantun, dbStatus }) {
 
   const handleFiles = (files) => {
     const f = files[0];
-    if (f && f.type.startsWith("image/")) {
-      setFile(f);
-      const reader = new FileReader();
-      reader.onload = (e) => setPreview(e.target.result);
-      reader.readAsDataURL(f);
-    } else {
+    if (!f) return;
+
+    if (!ALLOWED_TYPES.includes(f.type)) {
       alert(t("alert_image_only"));
+      return;
     }
+    if (f.size > MAX_FILE_SIZE) {
+      alert(t("alert_file_too_large"));
+      return;
+    }
+
+    setFile(f);
+    const reader = new FileReader();
+    reader.onload = (e) => setPreview(e.target.result);
+    reader.readAsDataURL(f);
   };
 
   const resetImage = () => {
@@ -124,7 +134,7 @@ export default function ScanPage({ totalPantun, dbStatus }) {
                     <h3>{t("upload_click")}</h3>
                     <p>{t("upload_format")}</p>
                   </div>
-                  <input type="file" id="file-input" accept="image/*" hidden onChange={(e) => handleFiles(e.target.files)} />
+                  <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => handleFiles(e.target.files)} />
                 </div>
               ) : (
                 <div id="preview-container">

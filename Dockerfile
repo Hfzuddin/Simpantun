@@ -50,7 +50,9 @@ COPY --from=frontend-builder /app/dist /app/dist
 EXPOSE 5500
 
 # Run via gunicorn. 1 worker on purpose: each worker would load its own
-# ~2GB copy of the CLIP/EasyOCR models, so more workers risks OOM.
+# ~2GB copy of the CLIP/EasyOCR models, so more workers risks OOM. threads
+# capped at 4 (not 8) so concurrent image-analysis requests can't stack up
+# too many simultaneous OCR/CLIP inference calls and blow the memory limit.
 # timeout=300 matches Cloud Run's own request timeout: cold-start model
 # loading measured at ~82s locally, so this leaves headroom on slower runs.
-CMD exec gunicorn --bind :${PORT:-5500} --workers 1 --threads 8 --timeout 300 run:app
+CMD exec gunicorn --bind :${PORT:-5500} --workers 1 --threads 4 --timeout 300 run:app

@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import ScanPage from "./pages/ScanPage";
 import ResultPage from "./pages/ResultPage";
 import HistoryPage from "./pages/HistoryPage";
+import GuidePage from "./pages/GuidePage";
 import { useLanguage } from "./context/LanguageContext";
 
 function App() {
@@ -69,6 +70,7 @@ function App() {
             <Route path="/result" element={<ResultPage />} />
 
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/guide" element={<GuidePage />} />
           </Routes>
         </main>
       </div>

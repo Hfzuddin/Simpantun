@@ -39,6 +39,14 @@ export default function Sidebar({ collapsed, open, isDark, toggleSidebar, toggle
           <i className="fa-solid fa-clock-rotate-left"></i>
           <span className="nav-label">{t("nav_history")}</span>
         </NavLink>
+
+        <NavLink
+          to="/guide"
+          className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+        >
+          <i className="fas fa-circle-info"></i>
+          <span className="nav-label">{t("nav_guide")}</span>
+        </NavLink>
       </nav>
       <div className="sidebar-footer">
         <button className="theme-btn" onClick={toggleTheme}>
