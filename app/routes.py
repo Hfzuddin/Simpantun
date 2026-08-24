@@ -55,12 +55,3 @@ def analyze():
 def uploaded_file(filename):
     from flask import send_from_directory
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
-
-@bp.route('/', defaults={'path': ''})
-@bp.route('/<path:path>')
-def catch_all(path):
-    import os
-    from flask import send_from_directory
-    if path != "" and os.path.exists(os.path.join(current_app.static_folder, path)):
-        return send_from_directory(current_app.static_folder, path)
-    return send_from_directory(current_app.static_folder, 'index.html')
