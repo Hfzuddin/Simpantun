@@ -35,57 +35,75 @@ export default function HistoryPage() {
 
   return (
     <div className="content-area">
-      <div className="container analytics-container" style={{ width: "100%", maxWidth: "800px" }}>
+      <div className="container analytics-container">
         <header>
           <h1><i className="fa-solid fa-clock-rotate-left"></i> {t("search_history_title")}</h1>
         </header>
 
         <div className="upload-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          {/* Header row: title + clear button */}
+          <div className="history-header-row">
             <h3>{t("saved_results")} ({history.length})</h3>
             {history.length > 0 && (
-              <button onClick={clearHistory} style={{ background: "#ef4444", color: "white", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
+              <button
+                onClick={clearHistory}
+                className="history-clear-btn"
+              >
                 <i className="fas fa-trash"></i> {t("clear_all")}
               </button>
             )}
           </div>
 
           {history.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-              <i className="fas fa-folder-open" style={{ fontSize: "3rem", marginBottom: "15px" }}></i>
+            <div className="history-empty">
+              <i className="fas fa-folder-open"></i>
               <p>{t("no_history")}</p>
-              <Link to="/" style={{ color: "var(--primary-color)", marginTop: "10px", display: "inline-block" }}>{t("back_to_scan")}</Link>
+              <Link to="/" className="history-back-link">{t("back_to_scan")}</Link>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              {history.map((item, index) => {
+            <div className="history-list">
+              {history.map((item) => {
                 const mode = item.data.search_mode || "Unknown";
                 const isVisual = mode.includes("Visual");
                 const displayMode = t(SEARCH_MODE_KEYS[mode]) || mode;
 
                 return (
-                  <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px", border: "1px solid var(--border-color)", borderRadius: "12px", background: "var(--bg-color)" }}>
-                    <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: isVisual ? "#dcfce7" : "#e0e7ff", color: isVisual ? "#166534" : "#4f46e5", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "1.2rem" }}>
+                  <div key={item.id} className="history-item">
+                    {/* Left side: icon + info */}
+                    <div className="history-item-left">
+                      <div
+                        className="history-mode-icon"
+                        style={{
+                          background: isVisual ? "#dcfce7" : "#e0e7ff",
+                          color: isVisual ? "#166534" : "#4f46e5",
+                        }}
+                      >
                         <i className={isVisual ? "fas fa-image" : "fas fa-font"}></i>
                       </div>
-                      <div>
-                        <div style={{ fontWeight: "bold", fontSize: "1.1rem" }}>{displayMode} {t("scan_suffix")}</div>
-                        <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>{formatDate(item.timestamp)}</div>
-                        <div style={{ fontSize: "0.85rem", marginTop: "4px" }}>
+                      <div className="history-item-info">
+                        <div className="history-item-title">
+                          {displayMode} {t("scan_suffix")}
+                        </div>
+                        <div className="history-item-date">{formatDate(item.timestamp)}</div>
+                        <div className="history-item-badge">
                           <span className="stats-badge" style={{ padding: "2px 8px", fontSize: "0.8rem" }}>
                             {item.data.results ? item.data.results.length : 0} {t("matches")}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <button onClick={() => viewResult(item)} style={{ background: "var(--primary-color)", color: "white", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
+
+                    {/* Right side: view button */}
+                    <div className="history-item-action">
+                      <button
+                        onClick={() => viewResult(item)}
+                        className="history-view-btn"
+                      >
                         {t("view")} <i className="fas fa-arrow-right" style={{ marginLeft: "5px" }}></i>
                       </button>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}

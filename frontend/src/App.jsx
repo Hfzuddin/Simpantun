@@ -35,11 +35,19 @@ function App() {
 
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
   const toggleMobileMenu = () => setSidebarOpen(!sidebarOpen);
+  const closeMobileMenu = () => setSidebarOpen(false);
   const toggleTheme = () => setIsDark(!isDark);
 
   return (
     <BrowserRouter>
       <div className="app-layout">
+        {/* Mobile sidebar overlay — click to close */}
+        <div
+          className={`sidebar-overlay${sidebarOpen ? " active" : ""}`}
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+
         <button
           className="lang-corner-btn"
           onClick={toggleLanguage}
@@ -50,25 +58,26 @@ function App() {
         </button>
 
         <Sidebar
-          collapsed={sidebarCollapsed} 
+          collapsed={sidebarCollapsed}
           open={sidebarOpen}
           isDark={isDark}
           toggleSidebar={toggleSidebar}
           toggleTheme={toggleTheme}
+          onNavClick={closeMobileMenu}
         />
-        
+
         <main className="main-content">
+          {/* Top nav bar for mobile */}
           <div className="top-nav">
-            <button className="toggle-btn" onClick={toggleMobileMenu}>
-              <i className="fas fa-bars"></i>
+            <button className="toggle-btn" onClick={toggleMobileMenu} aria-label="Toggle menu">
+              <i className={`fas ${sidebarOpen ? "fa-times" : "fa-bars"}`}></i>
             </button>
-            <span className="logo-text" style={{ marginLeft: "15px" }}>Simpantun</span>
+            <span className="topnav-logo">Simpantun</span>
           </div>
 
           <Routes>
             <Route path="/" element={<ScanPage totalPantun={totalPantun} dbStatus={dbStatus} />} />
             <Route path="/result" element={<ResultPage />} />
-
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/guide" element={<GuidePage />} />
           </Routes>
