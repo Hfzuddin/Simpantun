@@ -15,5 +15,6 @@ app/static/uploads/*
 
 # Lain-lain fail sistem yang tidak diperlukan dalam kontena
 .git/
+.claude/
 .vscode/
 .DS_Store
