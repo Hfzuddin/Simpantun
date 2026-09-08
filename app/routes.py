@@ -1,9 +1,5 @@
-import os
-import secrets
-import base64
 import logging
-from flask import Blueprint, request, jsonify, url_for, current_app
-from werkzeug.utils import secure_filename
+from flask import Blueprint, request, jsonify
 from app.services import process_pipeline, db_data
 
 logger = logging.getLogger(__name__)
@@ -24,16 +20,14 @@ def analyze():
         data = request.json
         if data.get('type') == 'text':
             res = process_pipeline(data.get('text'), 'text')
-            img_url = None
         else:
-            fname = secure_filename(data.get('filename', 'img.jpg'))
-            fname = f"{os.path.splitext(fname)[0]}_{secrets.token_hex(4)}.jpg"
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], fname)
-            with open(upload_path, "wb") as f:
-                f.write(base64.b64decode(data.get('image').split(",", 1)[1]))
+            # The upload is deliberately not written to disk. On Cloud Run the
+            # container filesystem lives in memory, so every saved image would
+            # hold RAM for the life of the instance -- nothing deleted them --
+            # until it was OOM-killed, and would 404 from any other instance.
+            # process_pipeline reads the base64 payload directly, and the
+            # frontend already holds the same image to show on the result page.
             res = process_pipeline(data.get('image'), 'image')
-            
-            img_url = request.host_url.rstrip('/') + url_for('routes.uploaded_file', filename=fname)
 
         if 'error' in res: return jsonify(res), 500
 
@@ -43,15 +37,9 @@ def analyze():
             'pantun_input': res.get('pantun_input', ''),
             'extracted_text': res.get('extracted_text', ''),
             'search_mode': res.get('search_mode', ''),
-            'input_keywords': res.get('input_keywords', []),
-            'image_url': img_url
+            'input_keywords': res.get('input_keywords', [])
         })
 
     except Exception as e:
         logger.error(f"Analyze: {e}")
         return jsonify({'error': 'Server Error'}), 500
-
-@bp.route('/uploads/<filename>')
-def uploaded_file(filename):
-    from flask import send_from_directory
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

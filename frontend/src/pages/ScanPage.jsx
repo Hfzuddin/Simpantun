@@ -89,7 +89,11 @@ export default function ScanPage({ totalPantun, dbStatus }) {
           console.error("Error saving history", e);
         }
 
-        navigate("/result", { state: res.data });
+        // The API no longer returns image_url -- the server does not store
+        // uploads. Hand the result page the local preview instead. History
+        // above deliberately keeps storing res.data without it, so a base64
+        // image never lands in localStorage.
+        navigate("/result", { state: { ...res.data, image_url: preview || null } });
       } else {
         alert(t("alert_error_prefix") + (res.data.error || t("alert_unknown_error")));
       }
