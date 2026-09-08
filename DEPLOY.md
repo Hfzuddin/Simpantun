@@ -46,7 +46,44 @@ gcloud logging read \
   --project pantun --limit 50 --format="value(textPayload)"
 ```
 
-### Deploy
+### Deploy from the console (no gcloud needed)
+
+The console route also wires up continuous deployment from GitHub, so it
+replaces both the manual deploy and section 3 below.
+
+1. **console.cloud.google.com** -> check the project picker says `pantun`.
+2. **Billing** -> link a billing account if the project has none. Required even
+   though the settings below stay inside the free tier.
+3. **Cloud Run** -> `CREATE SERVICE`.
+4. Choose **"Continuously deploy from a repository"** -> `SET UP WITH CLOUD BUILD`.
+   - Provider **GitHub**, authorise, pick `Hfzuddin/Simpantun`.
+   - Branch `^main$`, Build Type **Dockerfile**, location `/Dockerfile`.
+5. Service name `simpantun-api`, Region **asia-southeast1**.
+6. Authentication: **Allow unauthenticated invocations**.
+7. Open **Containers, Volumes, Networking, Security**:
+   - Container port: leave **8080**. Cloud Run injects `$PORT` and the
+     Dockerfile's gunicorn binds it, so this does not need to be 5500.
+   - Memory **4 GiB**, CPU **2**.
+   - Tick **Startup CPU boost**.
+   - Request timeout **300**.
+   - Max concurrent requests per instance **4**.
+8. Autoscaling: min **0**, max **2**.
+9. `CREATE`. The first build takes 15-20 minutes because it bakes the model
+   weights into the image.
+10. When it finishes, open `https://<service-url>/api/status`. A JSON body with
+    `total_pantun` means the backend is healthy.
+
+The old service in this project can be deleted once the new one answers, so it
+stops competing for the same free-tier quota.
+
+### Cap Artifact Registry storage
+
+Only 0.5GB is free and each deploy pushes a multi-GB image. In **Artifact
+Registry** -> repository `cloud-run-source-deploy` -> `CLEANUP POLICIES`, add a
+"Keep most recent versions" policy with count **2**, and a "Delete" policy for
+older versions. Without this, storage cost grows with every push.
+
+### Deploy from the CLI instead
 
 Run from the repository root. `--source .` builds the Dockerfile on Cloud Build,
 so a local Docker daemon is not needed.
