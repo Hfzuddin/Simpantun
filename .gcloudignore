@@ -1,0 +1,38 @@
+# What NOT to upload to Cloud Build. Without this file gcloud falls back to
+# .gitignore, which does not exclude everything we want kept out of the
+# build context.
+
+.git/
+.gitignore
+.claude/
+.vscode/
+.DS_Store
+*.log
+
+# Python environments and bytecode
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Regenerated inside the container on first boot from dataset/PantunGH.xlsx,
+# so shipping them would only risk a stale index.
+pantun_faiss.index
+pantun_data.npz
+dataset/Dataset.csv
+
+# User uploads are runtime state, not build input.
+uploads/
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Stage 1 of the Dockerfile runs npm install and vite build itself. Uploading
+# the host's node_modules would both bloat the context and shadow that build.
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Vercel-only config, irrelevant to the container image.
+vercel.json
+.vercelignore
