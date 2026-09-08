@@ -1,6 +1,7 @@
 import os
 import logging
 from flask import Flask, request, jsonify, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 
 def create_app():
@@ -11,8 +12,19 @@ def create_app():
     app = Flask(__name__, static_folder='../dist', static_url_path='/', template_folder='../dist')
     app.config.from_object(Config)
 
+    # Hugging Face Spaces (and Cloud Run) terminate TLS at a proxy and forward
+    # the original scheme/host in X-Forwarded-*. Without this, request.host_url
+    # in routes.analyze reports http://, so image_url comes back as an http URL
+    # that an https frontend refuses to load as mixed content.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+    # Origins allowed to call the API. Defaults to "*" so same-origin
+    # deployments (Docker, local) and quick tests keep working; set
+    # ALLOWED_ORIGINS to the Vercel domain to lock the API down to it.
     from flask_cors import CORS
-    CORS(app)
+    origins = os.environ.get("ALLOWED_ORIGINS", "*")
+    CORS(app, origins="*" if origins.strip() == "*"
+         else [o.strip() for o in origins.split(",") if o.strip()])
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

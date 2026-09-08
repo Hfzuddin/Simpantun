@@ -6,6 +6,7 @@ import ResultPage from "./pages/ResultPage";
 import HistoryPage from "./pages/HistoryPage";
 import GuidePage from "./pages/GuidePage";
 import { useLanguage } from "./context/LanguageContext";
+import { apiUrl } from "./api";
 
 function App() {
   const { lang, toggleLanguage } = useLanguage();
@@ -24,7 +25,7 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
-    fetch("/api/status")
+    fetch(apiUrl("/api/status"))
       .then((res) => res.json())
       .then((data) => {
         setTotalPantun(data.total_pantun);

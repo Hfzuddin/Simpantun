@@ -1,3 +1,13 @@
+---
+title: Simpantun
+emoji: 📖
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 5500
+pinned: false
+---
+
 # Simpantun
 
 An Artificial Intelligence (AI)-based system for processing, storing, and searching Malay Pantuns. This system integrates Optical Character Recognition (OCR) technology to extract pantuns from images, along with a smart search engine using FAISS.

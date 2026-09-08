@@ -1,0 +1,13 @@
+# Vercel only ever builds the Vite frontend, so keep the Python backend,
+# the AI model artifacts and the dataset out of the deployment upload.
+app/
+dataset/
+uploads/
+__pycache__/
+*.py
+requirements.txt
+Dockerfile
+docker-compose.yml
+.dockerignore
+pantun_faiss.index
+pantun_data.npz

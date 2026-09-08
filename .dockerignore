@@ -18,3 +18,10 @@ app/static/uploads/*
 .claude/
 .vscode/
 .DS_Store
+
+# Dependensi dan hasil binaan frontend — stage 1 memasang dan membina sendiri.
+# Menyalin node_modules hos akan menimpa hasil `npm install` dalam kontena
+# (dan membengkakkan konteks binaan, yang penting bila push ke Hugging Face).
+frontend/node_modules/
+frontend/dist/
+dist/

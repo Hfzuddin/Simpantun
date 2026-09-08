@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Loader from "../components/Loader";
 import { useLanguage } from "../context/LanguageContext";
+import { apiUrl } from "../api";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB, matches the limit shown in the UI
@@ -71,7 +72,7 @@ export default function ScanPage({ totalPantun, dbStatus }) {
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/analyze", payload);
+      const res = await axios.post(apiUrl("/api/analyze"), payload);
       if (res.data.success) {
         // Save to localStorage history
         try {
